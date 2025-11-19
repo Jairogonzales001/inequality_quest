@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inequality Quest: Mission Algebra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .start-screen, .mission-screen, .results-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .story-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+            text-align: left;
+        }
+
+        .mission-card {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .mission-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .mission-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-hint {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-size: 0.9em;
+            padding: 10px 25px;
+        }
+
+        .problem-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .inequality-display {
+            font-size: 2em;
+            color: #2c3e50;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .number-line {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .number-line svg {
+            width: 100%;
+            height: 100px;
+        }
+
+        .answer-input-container {
+            margin: 20px 0;
+        }
+
+        #answerInput {
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        #answerInput:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        #answerInput.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            animation: bounce 0.5s;
+        }
+
+        #answerInput.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            animation: shake 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .hint-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .achievement {
+            display: inline-block;
+            background: gold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 10px;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .step-by-step {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .emoji {
+            font-size: 2em;
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #f5576c;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .level-easy { background: #d4edda; color: #155724; }
+        .level-medium { background: #fff3cd; color: #856404; }
+        .level-hard { background: #f8d7da; color: #721c24; }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            animation: confetti-fall 3s linear;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🚀 Inequality Quest: Mission Algebra 🎯</h1>
+            <div class="stats-bar">
+                <div class="stat">⭐ Score: <span id="score">0</span></div>
+                <div class="stat">🏆 Level: <span id="level">1</span></div>
+                <div class="stat">🔥 Streak: <span id="streak">0</span></div>
+                <div class="stat">🎖️ Badges: <span id="badges">0</span></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Start Screen -->
+            <div id="startScreen" class="start-screen">
+                <h2>🌟 Welcome, Math Agent! 🌟</h2>
+                <div class="story-box">
+                    <p><strong>📡 INCOMING TRANSMISSION...</strong></p>
+                    <p>Agent, we need your help! The Algebra Space Station is facing critical challenges that only YOU can solve using your inequality skills!</p>
+                    <p>Master inequalities to unlock new missions, earn badges, and save the day!</p>
+                </div>
+
+                <div class="mission-card" onclick="selectDifficulty('easy')">
+                    <h3>🟢 Training Academy</h3>
+                    <span class="level-badge level-easy">EASY</span>
+                    <p>Learn the basics: px ± q > r</p>
+                </div>
+
+                <div class="mission-card" onclick="selectDifficulty('medium')">
+                    <h3>🟡 Field Operations</h3>
+                    <span class="level-badge level-medium">MEDIUM</span>
+                    <p>Advanced missions: p(x ± q) > r</p>
+                </div>
+
+                <div class="mission-card" onclick="selectDifficulty('hard')">
+                    <h3>🔴 Expert Challenges</h3>
+                    <span class="level-badge level-hard">HARD</span>
+                    <p>Elite level: Variables on both sides</p>
+                </div>
+
+                <button class="btn" onclick="startGame('mixed')">🎮 START ADVENTURE!</button>
+            </div>
+
+            <!-- Mission Screen -->
+            <div id="missionScreen" class="mission-screen hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar">Question <span id="questionNum">1</span> of 10</div>
+                </div>
+
+                <div class="scenario-box" id="scenarioBox">
+                    <!-- Scenario will be inserted here -->
+                </div>
+
+                <div class="problem-container">
+                    <div class="inequality-display" id="inequalityDisplay">
+                        <!-- Inequality will be shown here -->
+                    </div>
+
+                    <div id="questionText" style="font-size: 1.2em; margin: 15px 0; color: #2c3e50;">
+                        <!-- Question text -->
+                    </div>
+
+                    <div class="number-line" id="numberLineContainer">
+                        <!-- Number line will be drawn here -->
+                    </div>
+
+                    <div class="answer-input-container" id="answerInputContainer">
+                        <label for="answerInput" style="font-size: 1.2em; font-weight: bold; color: #2c3e50; display: block; margin-bottom: 10px;">
+                            Enter your answer (e.g., x > 5 or x >= 5):
+                        </label>
+                        <input type="text" id="answerInput" placeholder="Type your answer here..." style="width: 100%; padding: 15px; font-size: 1.2em; border: 3px solid #667eea; border-radius: 10px; font-family: 'Courier New', monospace; font-weight: bold;">
+                        <button class="btn btn-success" onclick="submitAnswer()" style="margin-top: 15px; width: 100%;">
+                            ✓ Submit Answer
+                        </button>
+                    </div>
+
+                    <button class="btn btn-hint" onclick="showHint()">💡 Need a Hint?</button>
+
+                    <div id="hintBox" class="hint-box hidden">
+                        <!-- Hints will appear here -->
+                    </div>
+
+                    <div id="feedbackBox" class="feedback hidden">
+                        <!-- Feedback will appear here -->
+                    </div>
+
+                    <div id="solutionBox" class="step-by-step hidden">
+                        <!-- Step-by-step solution -->
+                    </div>
+
+                    <button id="nextBtn" class="btn btn-success hidden" onclick="nextQuestion()">
+                        ➡️ Next Mission
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="results-screen hidden">
+                <h2>🎉 Mission Complete! 🎉</h2>
+                <div id="finalStats"></div>
+                <div id="achievementsBox"></div>
+                <button class="btn" onclick="location.reload()">🔄 Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            score: 0,
+            level: 1,
+            streak: 0,
+            badges: 0,
+            currentQuestion: 0,
+            totalQuestions: 10,
+            correctAnswers: 0,
+            difficulty: 'mixed',
+            hintsUsed: 0,
+            problems: []
+        };
+
+        // Problem Templates with Real-World Scenarios
+        const problemTemplates = {
+            easy: [
+                {
+                    scenario: "🎮 Gaming Tournament",
+                    story: "You need at least 500 points to qualify for the finals. You currently have 150 points. How many more points (x) do you need per round if there are 5 rounds left?",
+                    inequality: "5x + 150 ≥ 500",
+                    type: "px + q >= r",
+                    solution: "x ≥ 70",
+                    steps: [
+                        "Start: 5x + 150 ≥ 500",
+                        "Subtract 150 from both sides: 5x ≥ 350",
+                        "Divide both sides by 5: x ≥ 70",
+                        "Solution: x ≥ 70"
+                    ],
+                    hint: "First, subtract 150 from both sides, then divide by 5!"
+                },
+                {
+                    scenario: "🍕 Pizza Party Planning",
+                    story: "Each pizza costs $12. You have a $8 discount coupon. You can spend at most $100. How many pizzas (x) can you buy?",
+                    inequality: "12x - 8 ≤ 100",
+                    type: "px - q <= r",
+                    solution: "x ≤ 9",
+                    steps: [
+                        "Start: 12x - 8 ≤ 100",
+                        "Add 8 to both sides: 12x ≤ 108",
+                        "Divide both sides by 12: x ≤ 9",
+                        "Solution: x ≤ 9"
+                    ],
+                    hint: "Add 8 to both sides first, then divide by 12!"
+                },
+                {
+                    scenario: "🏃 Running Challenge",
+                    story: "You want to run more than 20 miles this week. You've already run 8 miles. If you run 3 miles per day for the remaining days (x), how many days do you need?",
+                    inequality: "3x + 8 > 20",
+                    type: "px + q > r",
+                    solution: "x > 4",
+                    steps: [
+                        "Start: 3x + 8 > 20",
+                        "Subtract 8 from both sides: 3x > 12",
+                        "Divide both sides by 3: x > 4",
+                        "Solution: x > 4"
+                    ],
+                    hint: "Subtract 8 first, then divide by 3!"
+                },
+                {
+                    scenario: "💰 Savings Goal",
+                    story: "You're saving for a $200 gadget. You have $45 saved. If you save $15 per week (x weeks), when will you have enough?",
+                    inequality: "15x + 45 ≥ 200",
+                    type: "px + q >= r",
+                    solution: "x ≥ 10.33",
+                    steps: [
+                        "Start: 15x + 45 ≥ 200",
+                        "Subtract 45 from both sides: 15x ≥ 155",
+                        "Divide both sides by 15: x ≥ 10.33",
+                        "Solution: x ≥ 11 weeks (round up)"
+                    ],
+                    hint: "Subtract 45, then divide by 15. Remember to round up for whole weeks!"
+                }
+            ],
+            medium: [
+                {
+                    scenario: "🎬 Movie Streaming",
+                    story: "A streaming service charges $5 per month plus $3 per movie. You want to spend less than $35 total. How many movies (x) can you watch?",
+                    inequality: "3(x + 2) < 35",
+                    type: "p(x + q) < r",
+                    solution: "x < 9.67",
+                    steps: [
+                        "Start: 3(x + 2) < 35",
+                        "Divide both sides by 3: x + 2 < 11.67",
+                        "Subtract 2 from both sides: x < 9.67",
+                        "Solution: x < 10 movies (round down)"
+                    ],
+                    hint: "Divide by 3 first to remove the parentheses, then subtract 2!"
+                },
+                {
+                    scenario: "🏀 Basketball Team",
+                    story: "Your team scores 4 points per player on average, plus a 12-point bonus. You need at least 60 points to win. How many players (x) need to score?",
+                    inequality: "4(x + 3) ≥ 60",
+                    type: "p(x + q) >= r",
+                    solution: "x ≥ 12",
+                    steps: [
+                        "Start: 4(x + 3) ≥ 60",
+                        "Divide both sides by 4: x + 3 ≥ 15",
+                        "Subtract 3 from both sides: x ≥ 12",
+                        "Solution: x ≥ 12"
+                    ],
+                    hint: "Divide both sides by 4, then subtract 3!"
+                },
+                {
+                    scenario: "🎨 Art Supplies",
+                    story: "Paint sets cost $8 each when you buy more than 2. With a bulk discount structure of 2(x - 1), you want to spend no more than $50. How many sets (x)?",
+                    inequality: "8(x - 1) ≤ 50",
+                    type: "p(x - q) <= r",
+                    solution: "x ≤ 7.25",
+                    steps: [
+                        "Start: 8(x - 1) ≤ 50",
+                        "Divide both sides by 8: x - 1 ≤ 6.25",
+                        "Add 1 to both sides: x ≤ 7.25",
+                        "Solution: x ≤ 7"
+                    ],
+                    hint: "Divide by 8 first, then add 1 to both sides!"
+                },
+                {
+                    scenario: "🚗 Road Trip",
+                    story: "Your car uses 2 gallons per hour of driving, starting with 5 gallons already used. You have less than 25 gallons total capacity. How many hours (x) can you drive?",
+                    inequality: "2(x + 5) < 25",
+                    type: "p(x + q) < r",
+                    solution: "x < 7.5",
+                    steps: [
+                        "Start: 2(x + 5) < 25",
+                        "Divide both sides by 2: x + 5 < 12.5",
+                        "Subtract 5 from both sides: x < 7.5",
+                        "Solution: x < 7.5 hours"
+                    ],
+                    hint: "Divide by 2, then subtract 5!"
+                }
+            ],
+            hard: [
+                {
+                    scenario: "🎪 Carnival Tickets",
+                    story: "Booth A gives you 5 tickets plus 3 per game. Booth B gives you 2 tickets plus 4 per game. After how many games (x) does Booth B give more tickets?",
+                    inequality: "2 + 4x > 5 + 3x",
+                    type: "variables both sides",
+                    solution: "x > 3",
+                    steps: [
+                        "Start: 2 + 4x > 5 + 3x",
+                        "Subtract 3x from both sides: 2 + x > 5",
+                        "Subtract 2 from both sides: x > 3",
+                        "Solution: x > 3 games"
+                    ],
+                    hint: "Get all x terms on one side by subtracting 3x from both sides!"
+                },
+                {
+                    scenario: "📱 Phone Plans",
+                    story: "Plan A: $30 + $0.10 per minute. Plan B: $20 + $0.15 per minute. After how many minutes (x) is Plan A cheaper?",
+                    inequality: "30 + 0.10x < 20 + 0.15x",
+                    type: "variables both sides",
+                    solution: "x > 200",
+                    steps: [
+                        "Start: 30 + 0.10x < 20 + 0.15x",
+                        "Subtract 0.10x from both sides: 30 < 20 + 0.05x",
+                        "Subtract 20 from both sides: 10 < 0.05x",
+                        "Divide by 0.05: x > 200",
+                        "Solution: x > 200 minutes"
+                    ],
+                    hint: "Move all x terms to one side, then solve like a regular inequality!"
+                },
+                {
+                    scenario: "🏊 Swimming Pool",
+                    story: "Pool A fills at 50 gallons/min starting with 100 gallons. Pool B fills at 40 gallons/min starting with 200 gallons. When does Pool A have at least as much water as Pool B?",
+                    inequality: "100 + 50x ≥ 200 + 40x",
+                    type: "variables both sides",
+                    solution: "x ≥ 10",
+                    steps: [
+                        "Start: 100 + 50x ≥ 200 + 40x",
+                        "Subtract 40x from both sides: 100 + 10x ≥ 200",
+                        "Subtract 100 from both sides: 10x ≥ 100",
+                        "Divide by 10: x ≥ 10",
+                        "Solution: x ≥ 10 minutes"
+                    ],
+                    hint: "Subtract 40x from both sides first to get all x terms together!"
+                },
+                {
+                    scenario: "🎯 Gaming Scores",
+                    story: "Your score: 450 + 25 points per level. Rival's score: 500 + 20 points per level. After how many levels (x) will you overtake your rival?",
+                    inequality: "450 + 25x > 500 + 20x",
+                    type: "variables both sides",
+                    solution: "x > 10",
+                    steps: [
+                        "Start: 450 + 25x > 500 + 20x",
+                        "Subtract 20x from both sides: 450 + 5x > 500",
+                        "Subtract 450 from both sides: 5x > 50",
+                        "Divide by 5: x > 10",
+                        "Solution: x > 10 levels"
+                    ],
+                    hint: "Subtract 20x from both sides, then isolate x!"
+                }
+            ]
+        };
+
+        function selectDifficulty(level) {
+            gameState.difficulty = level;
+            startGame(level);
+        }
+
+        function startGame(difficulty) {
+            gameState.difficulty = difficulty;
+            gameState.currentQuestion = 0;
+            gameState.correctAnswers = 0;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.hintsUsed = 0;
+
+            // Generate problems based on difficulty
+            generateProblems(difficulty);
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('missionScreen').classList.remove('hidden');
+
+            showQuestion();
+        }
+
+        function generateProblems(difficulty) {
+            gameState.problems = [];
+            let templates;
+
+            if (difficulty === 'mixed') {
+                // Mix all difficulty levels
+                for (let i = 0; i < 10; i++) {
+                    let diff = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)];
+                    let template = problemTemplates[diff][Math.floor(Math.random() * problemTemplates[diff].length)];
+                    gameState.problems.push(JSON.parse(JSON.stringify(template)));
+                }
+            } else {
+                templates = problemTemplates[difficulty];
+                // Select problems for this difficulty
+                for (let i = 0; i < 10; i++) {
+                    let template = templates[i % templates.length];
+                    gameState.problems.push(JSON.parse(JSON.stringify(template)));
+                }
+            }
+        }
+
+        function showQuestion() {
+            const problem = gameState.problems[gameState.currentQuestion];
+
+            // Update progress
+            document.getElementById('questionNum').textContent = gameState.currentQuestion + 1;
+            const progress = ((gameState.currentQuestion + 1) / gameState.totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Show scenario
+            document.getElementById('scenarioBox').innerHTML = `
+                <h3>${problem.scenario}</h3>
+                <p>${problem.story}</p>
+            `;
+
+            // Show inequality
+            document.getElementById('inequalityDisplay').textContent = problem.inequality;
+            document.getElementById('questionText').textContent = "Solve for x:";
+
+            // Draw number line
+            drawNumberLine(problem.solution);
+
+            // Reset input field
+            const answerInput = document.getElementById('answerInput');
+            answerInput.value = '';
+            answerInput.className = '';
+            answerInput.disabled = false;
+
+            // Enable submit button
+            const submitBtn = document.querySelector('.answer-input-container .btn-success');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+
+            // Reset UI
+            document.getElementById('hintBox').classList.add('hidden');
+            document.getElementById('feedbackBox').classList.add('hidden');
+            document.getElementById('solutionBox').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            // Allow Enter key to submit
+            answerInput.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    submitAnswer();
+                }
+            };
+        }
+
+        function drawNumberLine(solution) {
+            const container = document.getElementById('numberLineContainer');
+
+            // Extract the number and operator from solution
+            const match = solution.match(/(x\s*[<>≤≥]+\s*)(-?\d+\.?\d*)/);
+            if (!match) return;
+
+            const value = parseFloat(match[2]);
+            const operator = solution.includes('≥') || solution.includes('<=') ? 'closed' : 'open';
+            const direction = solution.includes('>') || solution.includes('≥') ? 'right' : 'left';
+
+            const svg = `
+                <svg viewBox="0 0 600 80" style="width: 100%; height: 80px;">
+                    <!-- Number line -->
+                    <line x1="50" y1="40" x2="550" y2="40" stroke="#2c3e50" stroke-width="3"/>
+
+                    <!-- Tick marks -->
+                    ${generateTicks(value)}
+
+                    <!-- Solution point -->
+                    <circle cx="${mapValueToX(value, value)}" cy="40" r="${operator === 'closed' ? '8' : '6'}"
+                            fill="${operator === 'closed' ? '#667eea' : 'white'}"
+                            stroke="#667eea" stroke-width="3"/>
+
+                    <!-- Direction arrow -->
+                    ${direction === 'right' ?
+                        `<line x1="${mapValueToX(value, value)}" y1="40" x2="530" y2="40" stroke="#f5576c" stroke-width="4" marker-end="url(#arrowhead)"/>` :
+                        `<line x1="${mapValueToX(value, value)}" y1="40" x2="70" y2="40" stroke="#f5576c" stroke-width="4" marker-end="url(#arrowhead-left)"/>`
+                    }
+
+                    <!-- Arrow markers -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#f5576c"/>
+                        </marker>
+                        <marker id="arrowhead-left" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto">
+                            <polygon points="10 0, 0 3, 10 6" fill="#f5576c"/>
+                        </marker>
+                    </defs>
+                </svg>
+            `;
+
+            container.innerHTML = svg;
+        }
+
+        function generateTicks(centerValue) {
+            let ticks = '';
+            const start = Math.floor(centerValue) - 5;
+
+            for (let i = 0; i <= 10; i++) {
+                const value = start + i;
+                const x = 50 + (i * 45);
+                ticks += `
+                    <line x1="${x}" y1="35" x2="${x}" y2="45" stroke="#2c3e50" stroke-width="2"/>
+                    <text x="${x}" y="60" text-anchor="middle" font-size="12" fill="#2c3e50">${value}</text>
+                `;
+            }
+            return ticks;
+        }
+
+        function mapValueToX(value, centerValue) {
+            const start = Math.floor(centerValue) - 5;
+            const position = value - start;
+            return 50 + (position * 45);
+        }
+
+        // Normalize answer for comparison
+        function normalizeAnswer(answer) {
+            return answer.toLowerCase()
+                .replace(/\s+/g, '')  // Remove all spaces
+                .replace(/≥/g, '>=')   // Convert symbols to text
+                .replace(/≤/g, '<=')
+                .replace(/−/g, '-')    // Convert minus symbols
+                .replace(/x>/g, 'x>')  // Ensure consistency
+                .replace(/x</g, 'x<')
+                .replace(/x>=/g, 'x>=')
+                .replace(/x<=/g, 'x<=');
+        }
+
+        function submitAnswer() {
+            const problem = gameState.problems[gameState.currentQuestion];
+            const answerInput = document.getElementById('answerInput');
+            const userAnswer = answerInput.value.trim();
+
+            // Check if empty
+            if (!userAnswer) {
+                alert('Please enter an answer!');
+                return;
+            }
+
+            // Disable input and submit button
+            answerInput.disabled = true;
+            const submitBtn = document.querySelector('.answer-input-container .btn-success');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            }
+
+            // Normalize answers for comparison
+            const normalizedUser = normalizeAnswer(userAnswer);
+            const normalizedCorrect = normalizeAnswer(problem.solution);
+
+            // Check if correct
+            const isCorrect = normalizedUser === normalizedCorrect;
+
+            // Visual feedback on input
+            if (isCorrect) {
+                answerInput.classList.add('correct');
+                showFeedback(true);
+                updateScore(true);
+            } else {
+                answerInput.classList.add('incorrect');
+                showFeedback(false);
+                updateScore(false);
+            }
+
+            // Show solution
+            showSolution(problem);
+
+            // Show next button
+            setTimeout(() => {
+                document.getElementById('nextBtn').classList.remove('hidden');
+            }, 1000);
+        }
+
+        function showFeedback(isCorrect) {
+            const feedbackBox = document.getElementById('feedbackBox');
+            const problem = gameState.problems[gameState.currentQuestion];
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackBox.className = 'feedback correct';
+                const messages = [
+                    "🎉 Outstanding work, Agent!",
+                    "⭐ Perfect! You're a natural!",
+                    "🚀 Incredible! Keep it up!",
+                    "💯 Brilliant solving!",
+                    "🏆 You're on fire!"
+                ];
+                feedbackBox.textContent = messages[Math.floor(Math.random() * messages.length)];
+                createConfetti();
+            } else {
+                feedbackBox.className = 'feedback incorrect';
+                feedbackBox.innerHTML = `💪 Not quite! The correct answer is: <strong>${problem.solution}</strong><br>Check the step-by-step solution below to see how to get there.`;
+            }
+        }
+
+        function updateScore(isCorrect) {
+            if (isCorrect) {
+                gameState.correctAnswers++;
+                gameState.streak++;
+
+                // Calculate points
+                let points = 100;
+                if (gameState.streak > 2) points += 50; // Streak bonus
+                if (gameState.hintsUsed === 0) points += 25; // No hint bonus
+
+                gameState.score += points;
+
+                // Check for badges
+                if (gameState.streak === 3) {
+                    gameState.badges++;
+                    showBadgeNotification("🔥 Hot Streak!");
+                }
+                if (gameState.streak === 5) {
+                    gameState.badges++;
+                    showBadgeNotification("⚡ Unstoppable!");
+                }
+            } else {
+                gameState.streak = 0;
+            }
+
+            // Update display
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('badges').textContent = gameState.badges;
+        }
+
+        function showHint() {
+            const problem = gameState.problems[gameState.currentQuestion];
+            const hintBox = document.getElementById('hintBox');
+
+            hintBox.innerHTML = `<strong>💡 Hint:</strong> ${problem.hint}`;
+            hintBox.classList.remove('hidden');
+            gameState.hintsUsed++;
+        }
+
+        function showSolution(problem) {
+            const solutionBox = document.getElementById('solutionBox');
+
+            let stepsHTML = '<h3>📝 Step-by-Step Solution:</h3>';
+            problem.steps.forEach((step, index) => {
+                stepsHTML += `<div class="step"><strong>Step ${index + 1}:</strong> ${step}</div>`;
+            });
+
+            solutionBox.innerHTML = stepsHTML;
+            solutionBox.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            gameState.currentQuestion++;
+            gameState.hintsUsed = 0;
+
+            if (gameState.currentQuestion < gameState.totalQuestions) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('missionScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            const percentage = (gameState.correctAnswers / gameState.totalQuestions) * 100;
+            let rank = '';
+            let rankEmoji = '';
+
+            if (percentage >= 90) {
+                rank = 'LEGENDARY AGENT';
+                rankEmoji = '👑';
+            } else if (percentage >= 75) {
+                rank = 'ELITE OPERATIVE';
+                rankEmoji = '🌟';
+            } else if (percentage >= 60) {
+                rank = 'SKILLED SOLVER';
+                rankEmoji = '⭐';
+            } else {
+                rank = 'TRAINEE';
+                rankEmoji = '📚';
+            }
+
+            document.getElementById('finalStats').innerHTML = `
+                <div class="story-box">
+                    <h3>${rankEmoji} Rank: ${rank} ${rankEmoji}</h3>
+                    <p><strong>Final Score:</strong> ${gameState.score} points</p>
+                    <p><strong>Accuracy:</strong> ${gameState.correctAnswers}/${gameState.totalQuestions} (${percentage.toFixed(1)}%)</p>
+                    <p><strong>Badges Earned:</strong> ${gameState.badges} 🎖️</p>
+                    <p><strong>Best Streak:</strong> ${gameState.streak} 🔥</p>
+                </div>
+            `;
+
+            let achievementsHTML = '<h3>🏆 Achievements Unlocked:</h3>';
+            if (percentage === 100) achievementsHTML += '<div class="achievement">🎯 Perfect Score!</div>';
+            if (gameState.streak >= 5) achievementsHTML += '<div class="achievement">⚡ Lightning Streak!</div>';
+            if (gameState.badges >= 3) achievementsHTML += '<div class="achievement">🎖️ Badge Collector!</div>';
+            if (gameState.score >= 1000) achievementsHTML += '<div class="achievement">💎 High Scorer!</div>';
+
+            document.getElementById('achievementsBox').innerHTML = achievementsHTML;
+
+            createMassiveConfetti();
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = ['#f093fb', '#667eea', '#38ef7d', '#f5576c'][Math.floor(Math.random() * 4)];
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+
+        function createMassiveConfetti() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = ['#f093fb', '#667eea', '#38ef7d', '#f5576c', '#ffd700'][Math.floor(Math.random() * 5)];
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        function showBadgeNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: gold;
+                padding: 20px;
+                border-radius: 15px;
+                font-weight: bold;
+                font-size: 1.2em;
+                animation: bounce 1s;
+                z-index: 1000;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
